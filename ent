@@ -1,0 +1,28 @@
+#!/bin/bash
+
+openssl aes-256-cbc -d -pbkdf2 -in $1 -out /tmp/tmp_entschl_datei
+ent_erfolg=$?
+#echo $ent_erfolg
+
+if [ $ent_erfolg -eq 0 ]
+    then
+        echo "Entschlüssung erfolgreich :)"
+        trash $1
+        mv /tmp/tmp_entschl_datei $1
+
+        echo $1 | grep '.zip$' > /dev/null
+        contains_zip=$?
+        echo $contains_zip
+        if [ $contains_zip -eq 0 ]
+            then
+                echo -n "Die datei ist eine Zipdatei. Darf ich sie mit unzip entpacken? [*/n]: "
+                read antwort
+                #echo $antwort
+                if [[ $antwort != "n" ]]
+                    then
+                        unzip $1 && trash $1 && echo "Entpackung auch erfolgreich :)"
+                fi
+        fi
+else
+    echo "Entschlüssung unerfolgreich ----- :("
+fi

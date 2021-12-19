@@ -1,0 +1,29 @@
+#!/bin/bash
+
+datei=$1
+
+# entfern den letzten Buchstaben, wenn er ein / ist
+#echo $datei | grep '/$' && echo hier
+echo $datei | grep '/$' && datei=$(echo "${datei%?}")
+echo -n "Datei: "
+echo $datei
+if [ -d $datei ]
+    then
+        echo "Die Datei ist einen Ordner. Ich verpacke sie selbst mit zip."
+        zip -r $datei.zip $datei && rm -rf $datei
+        datei=$datei.zip
+        #echo $datei
+fi
+
+openssl aes-256-cbc -e -pbkdf2 -in $datei -out /tmp/tmp_verschl_datei
+ver_erflog=$?
+#echo $ver_erflog
+
+if [ $ver_erflog -eq 0 ]
+    then
+        echo "Verschlüssung erfolgreich :)"
+        shred $datei && rm $datei
+        mv /tmp/tmp_verschl_datei $datei
+else
+    echo "Verschlüssung unerfolgreich ----- :("
+fi
